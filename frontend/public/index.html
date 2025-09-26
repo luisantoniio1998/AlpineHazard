@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#3b82f6" />
+
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Alpine Trail Guardian - AI-powered safety system for Swiss hiking and skiing. Real-time weather monitoring, route tracking, and emergency assistance." />
+    <meta name="keywords" content="Alpine, Swiss, Hiking, Skiing, Safety, Weather, Emergency, AI, Trail Guardian" />
+    <meta name="author" content="Alpine Trail Guardian Team - Swiss Re Hackathon" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://alpine-trail-guardian.com/" />
+    <meta property="og:title" content="Alpine Trail Guardian - Swiss Mountain Safety AI" />
+    <meta property="og:description" content="AI-powered safety system for Swiss Alpine adventures. Live weather monitoring, intelligent route recommendations, and emergency assistance." />
+    <meta property="og:image" content="%PUBLIC_URL%/og-image.jpg" />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="https://alpine-trail-guardian.com/" />
+    <meta property="twitter:title" content="Alpine Trail Guardian - Swiss Mountain Safety AI" />
+    <meta property="twitter:description" content="AI-powered safety system for Swiss Alpine adventures. Live weather monitoring, intelligent route recommendations, and emergency assistance." />
+    <meta property="twitter:image" content="%PUBLIC_URL%/twitter-image.jpg" />
+
+    <!-- Apple Touch Icon -->
+    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
+
+    <!-- Manifest for PWA -->
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+
+    <!-- Preconnect to external resources -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <!-- Google Fonts for better typography -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Leaflet CSS for maps -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+          crossorigin=""/>
+
+    <title>Alpine Trail Guardian - Swiss Mountain Safety AI</title>
+
+    <style>
+      /* Loading screen styles */
+      #loading-screen {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        transition: opacity 0.5s ease-out;
+      }
+
+      #loading-screen.hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .loading-logo {
+        width: 80px;
+        height: 80px;
+        margin-bottom: 2rem;
+        animation: pulse 2s ease-in-out infinite alternate;
+      }
+
+      .loading-text {
+        color: white;
+        font-family: 'Inter', sans-serif;
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        text-align: center;
+      }
+
+      .loading-subtitle {
+        color: rgba(255, 255, 255, 0.8);
+        font-family: 'Inter', sans-serif;
+        font-size: 1rem;
+        text-align: center;
+        margin-bottom: 2rem;
+      }
+
+      .loading-spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid rgba(255, 255, 255, 0.3);
+        border-top: 4px solid white;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes pulse {
+        from { transform: scale(1); }
+        to { transform: scale(1.1); }
+      }
+
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+
+      /* Hide loading screen when React loads */
+      #root:not(:empty) + #loading-screen {
+        display: none;
+      }
+
+      /* Custom scrollbar */
+      ::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      ::-webkit-scrollbar-track {
+        background: #f1f5f9;
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background: #3b82f6;
+        border-radius: 4px;
+      }
+
+      ::-webkit-scrollbar-thumb:hover {
+        background: #1d4ed8;
+      }
+    </style>
+  </head>
+
+  <body>
+    <noscript>
+      <div style="padding: 2rem; text-align: center; font-family: Arial, sans-serif;">
+        <h1>JavaScript Required</h1>
+        <p>Alpine Trail Guardian requires JavaScript to provide real-time safety features.</p>
+        <p>Please enable JavaScript in your browser settings to continue.</p>
+      </div>
+    </noscript>
+
+    <!-- React Root -->
+    <div id="root"></div>
+
+    <!-- Loading Screen -->
+    <div id="loading-screen">
+      <svg class="loading-logo" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 2L13.09 8.26L22 9L13.09 9.74L12 16L10.91 9.74L2 9L10.91 8.26L12 2Z" fill="white"/>
+        <path d="M12 16L13.09 22.26L22 23L13.09 23.74L12 30L10.91 23.74L2 23L10.91 22.26L12 16Z" fill="rgba(255,255,255,0.6)"/>
+      </svg>
+
+      <div class="loading-text">Alpine Trail Guardian</div>
+      <div class="loading-subtitle">Initializing safety systems...</div>
+      <div class="loading-spinner"></div>
+    </div>
+
+    <!-- Hide loading screen when React loads -->
+    <script>
+      // Hide loading screen when React app loads
+      window.addEventListener('DOMContentLoaded', function() {
+        setTimeout(function() {
+          const loadingScreen = document.getElementById('loading-screen');
+          const root = document.getElementById('root');
+
+          // Check if React has loaded content
+          const checkLoaded = setInterval(function() {
+            if (root && root.children.length > 0) {
+              loadingScreen.classList.add('hidden');
+              clearInterval(checkLoaded);
+
+              // Remove loading screen completely after transition
+              setTimeout(function() {
+                if (loadingScreen.parentNode) {
+                  loadingScreen.parentNode.removeChild(loadingScreen);
+                }
+              }, 500);
+            }
+          }, 100);
+
+          // Fallback: hide loading screen after 10 seconds regardless
+          setTimeout(function() {
+            if (loadingScreen.parentNode) {
+              loadingScreen.classList.add('hidden');
+              setTimeout(function() {
+                if (loadingScreen.parentNode) {
+                  loadingScreen.parentNode.removeChild(loadingScreen);
+                }
+              }, 500);
+            }
+            clearInterval(checkLoaded);
+          }, 10000);
+        }, 500);
+      });
+    </script>
+  </body>
+</html>

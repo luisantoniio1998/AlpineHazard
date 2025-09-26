@@ -1,0 +1,116 @@
+version: '3.8'
+
+services:
+  weather-monitor:
+    build: 
+      context: ./services/weather-monitor
+    container_name: alpine-weather
+    ports:
+      - "3002:3002"  # HTTP API
+      - "3012:3012"  # WebSocket
+    environment:
+      - NODE_ENV=development
+      - DATA_SOURCE=csv
+      - LOG_LEVEL=info
+    volumes:
+      - ./data:/app/data:ro  # CSV data files
+      - ./logs:/app/logs     # Log files
+    networks:
+      - alpine-net
+    restart: unless-stopped
+
+  # Alert Engine Service - Risk assessment
+  alert-engine:
+    build: 
+      context: ./services/alert-engine
+    container_name: alpine-alerts
+    ports:
+      - "3003:3003"
+    environment:
+      - NODE_ENV=development
+      - WEATHER_SERVICE_URL=http://weather-monitor:3002
+    depends_on:
+      - weather-monitor
+    volumes:
+      - ./data:/app/data:ro
+      - ./logs:/app/logs
+    networks:
+      - alpine-net
+    restart: unless-stopped
+
+  # API Gateway Service
+  api-gateway:
+    build:
+      context: ./gateway
+    container_name: alpine-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      - NODE_ENV=development
+      - WEATHER_SERVICE_URL=http://weather-monitor:3002
+      - ALERT_SERVICE_URL=http://alert-engine:3003
+    depends_on:
+      - weather-monitor
+      - alert-engine
+    networks:
+      - alpine-net
+    restart: unless-stopped
+
+  # RAG Service - Apertus Swiss AI with knowledge base
+  rag-service:
+    build:
+      context: ./services/rag-service
+    container_name: alpine-rag
+    ports:
+      - "8001:8001"
+    environment:
+      - PYTHON_ENV=development
+      - HF_TOKEN=${HF_TOKEN:-}
+      - TRANSFORMERS_CACHE=/app/models
+      - TORCH_HOME=/app/models
+    volumes:
+      - ./data:/app/data:ro
+      - ./logs:/app/logs
+      - rag-models:/app/models
+      - rag-embeddings:/app/embeddings
+    networks:
+      - alpine-net
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 8G
+        reservations:
+          memory: 4G
+
+  # Frontend - React web application
+  frontend:
+    build:
+      context: ./frontend
+    container_name: alpine-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_API_URL=http://localhost:8080
+      - REACT_APP_WS_URL=ws://localhost:3012
+      - REACT_APP_RAG_URL=http://localhost:8001
+      - REACT_APP_DEMO_MODE=true
+    depends_on:
+      - api-gateway
+      - rag-service
+    networks:
+      - alpine-net
+    restart: unless-stopped   
+
+networks:
+  alpine-net:
+    driver: bridge
+
+# Volumes for persistent data
+volumes:
+  logs:
+    driver: local
+  rag-models:
+    driver: local
+  rag-embeddings:
+    driver: local

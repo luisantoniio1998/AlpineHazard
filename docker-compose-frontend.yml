@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  # Frontend - React web application
+  frontend:
+    build:
+      context: ./frontend
+    container_name: alpine-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_API_URL=http://localhost:8080
+      - REACT_APP_WS_URL=ws://localhost:3012
+      - REACT_APP_DEMO_MODE=true
+    networks:
+      - alpine-net
+    restart: unless-stopped
+
+networks:
+  alpine-net:
+    driver: bridge

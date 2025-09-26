@@ -1,0 +1,68 @@
+{
+  "short_name": "Alpine Guardian",
+  "name": "Alpine Trail Guardian - Swiss Mountain Safety AI",
+  "description": "AI-powered safety system for Swiss Alpine adventures with real-time weather monitoring and emergency assistance",
+  "icons": [
+    {
+      "src": "favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "logo192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "logo512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#3b82f6",
+  "background_color": "#f8fafc",
+  "orientation": "portrait-primary",
+  "categories": ["travel", "safety", "weather", "sports"],
+  "lang": "en",
+  "scope": "/",
+  "shortcuts": [
+    {
+      "name": "Weather Dashboard",
+      "short_name": "Weather",
+      "description": "Check current alpine weather conditions",
+      "url": "/?shortcut=weather",
+      "icons": [
+        {
+          "src": "logo192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Route Tracker",
+      "short_name": "Routes",
+      "description": "Track your hiking or skiing route",
+      "url": "/route?shortcut=tracker",
+      "icons": [
+        {
+          "src": "logo192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "AI Assistant",
+      "short_name": "AI Help",
+      "description": "Get AI-powered safety guidance",
+      "url": "/ai?shortcut=assistant",
+      "icons": [
+        {
+          "src": "logo192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,49 @@
+{
+  "name": "alpine-trail-guardian-frontend",
+  "version": "1.0.0",
+  "description": "Frontend for Alpine Trail Guardian - Swiss Re Hackathon",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "react-scripts start",
+    "dev": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-scripts": "5.0.1",
+    "react-router-dom": "^6.8.0",
+    "leaflet": "^1.9.4",
+    "react-leaflet": "^4.2.1",
+    "axios": "^1.6.0",
+    "date-fns": "^2.30.0",
+    "lucide-react": "^0.292.0",
+    "socket.io-client": "^4.7.4",
+    "@emotion/react": "^11.11.1",
+    "@emotion/styled": "^11.11.0"
+  },
+  "devDependencies": {
+    "web-vitals": "^3.5.0"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "proxy": "http://localhost:8080"
+}
