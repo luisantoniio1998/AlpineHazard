@@ -1,0 +1,54 @@
+services:
+  # RAG Service - Apertus Swiss AI with knowledge base
+  rag-service:
+    build:
+      context: ./services/rag-service
+    container_name: alpine-rag
+    ports:
+      - "8001:8001"
+    environment:
+      - PYTHON_ENV=development
+      - HF_TOKEN=${HF_TOKEN:-}
+      - TRANSFORMERS_CACHE=/app/models
+      - TORCH_HOME=/app/models
+    volumes:
+      - ./data:/app/data:ro
+      - ./logs:/app/logs
+      - rag-models:/app/models
+      - rag-embeddings:/app/embeddings
+    networks:
+      - alpine-net
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 8G
+        reservations:
+          memory: 4G
+
+  # Frontend - React web application
+  frontend:
+    build:
+      context: ./frontend
+    container_name: alpine-frontend
+    ports:
+      - "3001:3000"
+    environment:
+      - REACT_APP_RAG_URL=http://localhost:8001
+      - REACT_APP_DEMO_MODE=true
+    depends_on:
+      - rag-service
+    networks:
+      - alpine-net
+    restart: unless-stopped   
+
+networks:
+  alpine-net:
+    driver: bridge
+
+# Volumes for persistent data
+volumes:
+  rag-models:
+    driver: local
+  rag-embeddings:
+    driver: local

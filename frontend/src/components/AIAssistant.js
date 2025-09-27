@@ -1,12 +1,18 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
+  MessageCircle,
   Send,
   Bot,
   User,
   AlertTriangle,
+  MapPin,
   Mountain,
   CloudRain,
-  Navigation
+  Thermometer,
+  Eye,
+  Phone,
+  Navigation,
+  Clock
 } from 'lucide-react';
 import ragService from '../services/ragService';
 
@@ -14,10 +20,7 @@ const AIAssistant = () => {
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  const [systemStatus, setSystemStatus] = useState(null);
-  const [currentContext, setCurrentContext] = useState({});
-  const [suggestions, setSuggestions] = useState([]);
-  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [selectedScenario, setSelectedScenario] = useState(null);
   const messagesEndRef = useRef(null);
 
   // Pre-defined scenarios for demo
@@ -53,116 +56,26 @@ const AIAssistant = () => {
   ];
 
   useEffect(() => {
-    initializeAI();
-    scrollToBottom();
-  }, []);
-
-  const initializeAI = async () => {
-    // Check system status
-    const status = await ragService.getSystemStatus();
-    setSystemStatus(status);
-
-    // Get context from other components (weather, location, etc.)
-    updateContext();
-
-    // Welcome message with system status
+    // Welcome message
     const welcomeMessage = {
       id: Date.now(),
       type: 'bot',
       content: `🏔️ **Welcome to Alpine Trail Guardian AI**
 
-I'm powered by Apertus, Switzerland's advanced AI model, specialized in Alpine safety!
+I'm your intelligent mountain safety assistant! I can help you with:
 
-${status.apertusLoaded ?
-  '✅ **Apertus Swiss AI** - Fully loaded and ready\n' +
-  `✅ **Knowledge Base** - ${status.knowledgeBaseSize} safety documents` :
-  '⚠️ **Demo Mode** - Full AI capabilities loading...'
-}
-
-I can help you with:
 • **Route Planning** - Safe paths based on current conditions
 • **Weather Analysis** - Real-time risk assessment
 • **Emergency Guidance** - Step-by-step safety protocols
-• **Equipment Advice** - Gear recommendations
+• **Equipment Advice** - Gear recommendations for conditions
 
 Ask me anything about Swiss alpine safety, or try one of the scenarios below!`,
-      timestamp: new Date(),
-      systemInfo: status
+      timestamp: new Date()
     };
 
     setMessages([welcomeMessage]);
-    generateSmartSuggestions('welcome');
-  };
-
-  const updateContext = () => {
-    // Get weather and location data from localStorage or props
-    const weather = JSON.parse(localStorage.getItem('currentWeather') || '{}');
-    const location = localStorage.getItem('currentLocation') || 'Swiss Alps';
-    const activity = localStorage.getItem('currentActivity') || 'hiking';
-
-    setCurrentContext({
-      location,
-      activityType: activity,
-      weather,
-      coordinates: { lat: 46.0207, lon: 7.7491 } // Default to Zermatt
-    });
-  };
-
-  const generateSmartSuggestions = (context, lastMessage = '') => {
-    let newSuggestions = [];
-
-    const baseQuestions = [
-      "Is the Matterhorn dangerous?",
-      "What are emergency numbers in Switzerland?",
-      "Tell me about Matterhorn safety",
-      "How dangerous is mountaineering?",
-      "What are Swiss rescue numbers?",
-      "Is it safe to climb the Matterhorn?"
-    ];
-
-    if (context === 'welcome') {
-      newSuggestions = [
-        "Is it safe to hike the Matterhorn route?",
-        "Tell me about Matterhorn climbing dangers",
-        "What are emergency numbers in Switzerland?",
-        "How dangerous is the Matterhorn?"
-      ];
-    } else if (lastMessage.toLowerCase().includes('weather')) {
-      newSuggestions = [
-        "What about avalanche conditions?",
-        "Should I postpone my trip?",
-        "What are the visibility conditions?",
-        "Any weather warnings for tomorrow?"
-      ];
-    } else if (lastMessage.toLowerCase().includes('avalanche')) {
-      newSuggestions = [
-        "Where can I check conditions?",
-        "What equipment do I need?",
-        "How do I use a beacon?",
-        "Are there safe alternative routes?"
-      ];
-    } else if (lastMessage.toLowerCase().includes('emergency')) {
-      newSuggestions = [
-        "How do I signal for help?",
-        "What info should I give rescuers?",
-        "First aid for hypothermia?",
-        "How to create emergency shelter?"
-      ];
-    } else if (lastMessage.toLowerCase().includes('equipment') || lastMessage.toLowerCase().includes('gear')) {
-      newSuggestions = [
-        "Where can I rent gear in Switzerland?",
-        "How do I test avalanche equipment?",
-        "What about clothing layers?",
-        "Emergency shelter options?"
-      ];
-    } else {
-      // Random selection from base questions
-      newSuggestions = baseQuestions.sort(() => 0.5 - Math.random()).slice(0, 4);
-    }
-
-    setSuggestions(newSuggestions);
-    setShowSuggestions(true);
-  };
+    scrollToBottom();
+  }, []);
 
   useEffect(() => {
     scrollToBottom();
@@ -187,73 +100,69 @@ Ask me anything about Swiss alpine safety, or try one of the scenarios below!`,
     setIsTyping(true);
 
     try {
-      // Try RAG service first, fallback to demo mode if needed
-      const aiResponse = await ragService.sendMessage(message, currentContext);
+      const response = await ragService.sendMessage(message, {
+        location: selectedScenario?.location,
+        activityType: selectedScenario?.activityType,
+        weather: selectedScenario?.weather
+      });
 
       const botMessage = {
-        id: Date.now() + 1,
+        id: Date.now(),
         type: 'bot',
-        content: aiResponse.message,
+        content: response.message,
         timestamp: new Date(),
-        sources: aiResponse.sources,
-        confidence: aiResponse.confidence,
-        modelUsed: aiResponse.modelUsed,
-        responseTime: aiResponse.responseTime,
-        suggestions: aiResponse.suggestions
+        metadata: {
+          confidence: response.confidence,
+          sources: response.sources,
+          responseTime: response.responseTime
+        }
       };
 
       setMessages(prev => [...prev, botMessage]);
-      generateSmartSuggestions('response', message);
-
     } catch (error) {
-      console.error('AI Response error:', error);
-
-      // Fallback to local response
-      const fallbackMessage = {
-        id: Date.now() + 1,
+      console.error('Chat error:', error);
+      const errorMessage = {
+        id: Date.now(),
         type: 'bot',
-        content: "Sorry, I'm having technical difficulties. For emergencies, call 1414.",
-        timestamp: new Date(),
-        isError: true
+        content: "I apologize, but I'm having trouble connecting to my knowledge base. For urgent safety information, please check official sources or call 1414 for emergencies.",
+        timestamp: new Date()
       };
-
-      setMessages(prev => [...prev, fallbackMessage]);
-      generateSmartSuggestions('response', message);
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
+      setIsTyping(false);
     }
-
-    setIsTyping(false);
   };
 
-  const generateFallbackResponse = (userMessage) => {
+  // Legacy response generator - removed as we now use RAG service
+  /*const generateAIResponse = (userMessage) => {
     const message = userMessage.toLowerCase();
 
     let response = '';
 
     // Route planning responses
     if (message.includes('hike') || message.includes('route') || message.includes('zermatt') || message.includes('matterhorn')) {
-      response = `🚨 **IMPORTANT SAFETY WARNING**
+      response = `🎯 **Route Analysis: Zermatt to Matterhorn Base Camp**
 
-I'm temporarily unable to access live safety data. Please check official sources immediately:
+**Current Conditions:**
+• ✅ **Weather**: Partly cloudy, -2°C at base, -8°C at elevation
+• ⚠️ **Avalanche Risk**: Moderate (Level 3/5) above 2500m
+• ✅ **Trail Status**: Open with caution advisories
 
-**For Matterhorn specifically:**
-⚠️ **EXTREME DANGER** - The Matterhorn is one of the world's most dangerous mountains
-• Requires expert mountaineering skills
-• 4,478m elevation with technical rock/ice climbing
-• High fatality rate - many deaths annually
-• Only for experienced alpinists with proper gear and guides
+**Safety Recommendations:**
+1. **Start Early** - Begin before 7 AM to avoid afternoon weather changes
+2. **Essential Gear** - Avalanche beacon, probe, shovel above Schwarzsee
+3. **Checkpoints** - Report at Furi Station (3.2km) and Schwarzsee (7.8km)
+4. **Turnaround Time** - If not at Schwarzsee by 11 AM, consider turning back
 
-**Essential checks before ANY alpine activity:**
-• **Weather**: meteoswiss.admin.ch
-• **Avalanche**: slf.ch
-• **Route conditions**: Local mountain guides/tourist offices
-• **Emergency**: Always carry emergency beacon
+**Weather Alerts:**
+• Wind increasing to 45 km/h after 2 PM
+• Temperature drop expected around 3 PM
 
 **Emergency Contacts:**
 📞 Swiss Alpine Rescue: **1414**
 📞 Zermatt Mountain Rescue: **+41 27 966 0101**
 
-❌ **NEVER attempt technical routes without proper training and equipment**
-Please consult certified mountain guides for all alpine activities.`;
+Would you like specific shelter locations or alternative route options?`;
     }
     // Weather concerns
     else if (message.includes('weather') || message.includes('ski') || message.includes('verbier') || message.includes('off-piste')) {
@@ -409,16 +318,17 @@ What's your mountain activity or concern today?`
       response = responses[Math.floor(Math.random() * responses.length)];
     }
 
-    return response;
-  };
+    return {
+      id: Date.now(),
+      type: 'bot',
+      content: response,
+      timestamp: new Date()
+    };
+  };*/
 
   const handleScenarioClick = (scenario) => {
+    setSelectedScenario(scenario);
     handleSendMessage(scenario.prompt);
-  };
-
-  const handleSuggestionClick = (suggestion) => {
-    setShowSuggestions(false);
-    handleSendMessage(suggestion);
   };
 
   const formatTimestamp = (timestamp) => {
@@ -507,32 +417,6 @@ What's your mountain activity or concern today?`
 
           <div ref={messagesEndRef} />
         </div>
-
-        {/* Smart Suggestions */}
-        {showSuggestions && suggestions.length > 0 && (
-          <div className="suggestions-container">
-            <div className="suggestions-header">
-              <span>💡 Suggested questions:</span>
-              <button
-                className="suggestions-close"
-                onClick={() => setShowSuggestions(false)}
-              >
-                ×
-              </button>
-            </div>
-            <div className="suggestions-grid">
-              {suggestions.map((suggestion, index) => (
-                <button
-                  key={index}
-                  className="suggestion-btn"
-                  onClick={() => handleSuggestionClick(suggestion)}
-                >
-                  {suggestion}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
 
         <div className="chat-input">
           <input
@@ -835,75 +719,6 @@ What's your mountain activity or concern today?`
           cursor: not-allowed;
         }
 
-        .suggestions-container {
-          background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
-          border-top: 1px solid #bae6fd;
-          padding: 1.5rem;
-          animation: slideIn 0.3s ease;
-        }
-
-        @keyframes slideIn {
-          from {
-            transform: translateY(-20px);
-            opacity: 0;
-          }
-          to {
-            transform: translateY(0);
-            opacity: 1;
-          }
-        }
-
-        .suggestions-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 1rem;
-          font-weight: 600;
-          color: #0c4a6e;
-        }
-
-        .suggestions-close {
-          background: none;
-          border: none;
-          font-size: 1.5rem;
-          color: #64748b;
-          cursor: pointer;
-          padding: 0.25rem 0.5rem;
-          border-radius: 4px;
-          transition: background 0.2s;
-        }
-
-        .suggestions-close:hover {
-          background: rgba(100, 116, 139, 0.1);
-        }
-
-        .suggestions-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-          gap: 0.75rem;
-        }
-
-        .suggestion-btn {
-          background: white;
-          border: 2px solid #bae6fd;
-          color: #0c4a6e;
-          padding: 0.75rem 1rem;
-          border-radius: 8px;
-          cursor: pointer;
-          font-size: 0.875rem;
-          text-align: left;
-          transition: all 0.2s;
-          font-weight: 500;
-        }
-
-        .suggestion-btn:hover {
-          border-color: #0ea5e9;
-          background: #0ea5e9;
-          color: white;
-          transform: translateY(-1px);
-          box-shadow: 0 4px 12px rgba(14, 165, 233, 0.2);
-        }
-
         @media (max-width: 768px) {
           .scenarios-grid {
             grid-template-columns: 1fr;
@@ -927,19 +742,6 @@ What's your mountain activity or concern today?`
           }
 
           .chat-input {
-            padding: 1rem;
-          }
-
-          .suggestions-container {
-            padding: 1rem;
-          }
-
-          .suggestions-grid {
-            grid-template-columns: 1fr;
-          }
-
-          .suggestion-btn {
-            text-align: center;
             padding: 1rem;
           }
         }
