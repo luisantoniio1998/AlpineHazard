@@ -130,6 +130,9 @@ class AlpineRAGSystem:
         logger.info(f"Loading Apertus model: {self.apertus_model_name}")
 
         try:
+            # Get HuggingFace token from environment
+            hf_token = os.getenv('HF_TOKEN')
+
             # Check if CUDA is available
             device = "cuda" if torch.cuda.is_available() else "cpu"
             logger.info(f"Using device: {device}")
@@ -137,7 +140,8 @@ class AlpineRAGSystem:
             # Load tokenizer
             self.apertus_tokenizer = AutoTokenizer.from_pretrained(
                 self.apertus_model_name,
-                trust_remote_code=True
+                trust_remote_code=True,
+                use_auth_token=hf_token
             )
 
             # Add padding token if not present
@@ -157,6 +161,7 @@ class AlpineRAGSystem:
 
             self.apertus_model = AutoModelForCausalLM.from_pretrained(
                 self.apertus_model_name,
+                use_auth_token=hf_token,
                 **model_kwargs
             )
 
