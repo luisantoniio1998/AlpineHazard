@@ -39,6 +39,12 @@
   height: 32px;
 }
 
+.logo-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
 .logo h1 {
   margin: 0;
   font-size: 1.5rem;
@@ -47,6 +53,37 @@
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+}
+
+.powered-by {
+  font-size: 0.75rem;
+  color: #bfdbfe;
+  font-weight: 500;
+  opacity: 0.9;
+}
+
+/* Swiss Re Partnership Badge */
+.partnership-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.partner-logo {
+  height: 32px;
+  width: auto;
+  filter: brightness(1.1);
+}
+
+.partnership-text {
+  font-size: 0.75rem;
+  color: #e0f2fe;
+  font-weight: 500;
 }
 
 /* Status Indicator */
@@ -169,6 +206,50 @@
   font-weight: 700;
 }
 
+/* Swiss Re Footer Branding */
+.swiss-re-section {
+  grid-column: 1 / -1;
+  border-top: 2px solid #374151;
+  padding-top: 1.5rem;
+  margin-top: 1rem;
+}
+
+.swiss-re-branding {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.footer-logo {
+  height: 48px;
+  width: auto;
+  filter: brightness(1.2);
+}
+
+.branding-text {
+  flex: 1;
+  min-width: 300px;
+}
+
+.branding-text h4 {
+  color: #60a5fa;
+  font-size: 1.1rem;
+  margin-bottom: 0.75rem;
+}
+
+.branding-text p {
+  margin: 0.25rem 0;
+  font-size: 0.9rem;
+}
+
+.swiss-re-motto {
+  font-style: italic;
+  color: #60a5fa !important;
+  font-weight: 500;
+  margin-top: 0.5rem;
+}
+
 /* Mobile Responsive */
 @media (max-width: 768px) {
   .menu-toggle {
@@ -212,6 +293,34 @@
   .footer-content {
     grid-template-columns: 1fr;
     text-align: center;
+  }
+
+  .partnership-badge {
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0.75rem;
+  }
+
+  .partner-logo {
+    height: 24px;
+  }
+
+  .partnership-text {
+    font-size: 0.7rem;
+  }
+
+  .swiss-re-branding {
+    flex-direction: column;
+    text-align: center;
+    gap: 1rem;
+  }
+
+  .branding-text {
+    min-width: auto;
+  }
+
+  .footer-logo {
+    height: 40px;
   }
 
   .main-content {

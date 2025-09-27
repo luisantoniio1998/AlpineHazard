@@ -16,6 +16,8 @@ const AIAssistant = () => {
   const [isTyping, setIsTyping] = useState(false);
   const [systemStatus, setSystemStatus] = useState(null);
   const [currentContext, setCurrentContext] = useState({});
+  const [suggestions, setSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const messagesEndRef = useRef(null);
 
   // Pre-defined scenarios for demo
@@ -89,6 +91,7 @@ Ask me anything about Swiss alpine safety, or try one of the scenarios below!`,
     };
 
     setMessages([welcomeMessage]);
+    generateSmartSuggestions('welcome');
   };
 
   const updateContext = () => {
@@ -103,6 +106,62 @@ Ask me anything about Swiss alpine safety, or try one of the scenarios below!`,
       weather,
       coordinates: { lat: 46.0207, lon: 7.7491 } // Default to Zermatt
     });
+  };
+
+  const generateSmartSuggestions = (context, lastMessage = '') => {
+    let newSuggestions = [];
+
+    const baseQuestions = [
+      "What's the current avalanche risk?",
+      "Show me emergency contacts",
+      "What equipment do I need today?",
+      "Is it safe to go off-piste?",
+      "What are the weather warnings?",
+      "How do I call for rescue?"
+    ];
+
+    if (context === 'welcome') {
+      newSuggestions = [
+        "What's the weather like in Zermatt today?",
+        "Is it safe to hike the Matterhorn route?",
+        "Show me emergency numbers",
+        "What gear do I need for winter hiking?"
+      ];
+    } else if (lastMessage.toLowerCase().includes('weather')) {
+      newSuggestions = [
+        "What about avalanche conditions?",
+        "Should I postpone my trip?",
+        "What are the visibility conditions?",
+        "Any weather warnings for tomorrow?"
+      ];
+    } else if (lastMessage.toLowerCase().includes('avalanche')) {
+      newSuggestions = [
+        "Where can I check conditions?",
+        "What equipment do I need?",
+        "How do I use a beacon?",
+        "Are there safe alternative routes?"
+      ];
+    } else if (lastMessage.toLowerCase().includes('emergency')) {
+      newSuggestions = [
+        "How do I signal for help?",
+        "What info should I give rescuers?",
+        "First aid for hypothermia?",
+        "How to create emergency shelter?"
+      ];
+    } else if (lastMessage.toLowerCase().includes('equipment') || lastMessage.toLowerCase().includes('gear')) {
+      newSuggestions = [
+        "Where can I rent gear in Switzerland?",
+        "How do I test avalanche equipment?",
+        "What about clothing layers?",
+        "Emergency shelter options?"
+      ];
+    } else {
+      // Random selection from base questions
+      newSuggestions = baseQuestions.sort(() => 0.5 - Math.random()).slice(0, 4);
+    }
+
+    setSuggestions(newSuggestions);
+    setShowSuggestions(true);
   };
 
   useEffect(() => {
@@ -128,7 +187,7 @@ Ask me anything about Swiss alpine safety, or try one of the scenarios below!`,
     setIsTyping(true);
 
     try {
-      // Send to Apertus RAG system
+      // Try RAG service first, fallback to demo mode if needed
       const aiResponse = await ragService.sendMessage(message, currentContext);
 
       const botMessage = {
@@ -144,6 +203,7 @@ Ask me anything about Swiss alpine safety, or try one of the scenarios below!`,
       };
 
       setMessages(prev => [...prev, botMessage]);
+      generateSmartSuggestions('response', message);
 
     } catch (error) {
       console.error('AI Response error:', error);
@@ -152,12 +212,13 @@ Ask me anything about Swiss alpine safety, or try one of the scenarios below!`,
       const fallbackMessage = {
         id: Date.now() + 1,
         type: 'bot',
-        content: generateFallbackResponse(message),
+        content: "Sorry, I'm having technical difficulties. For emergencies, call 1414.",
         timestamp: new Date(),
         isError: true
       };
 
       setMessages(prev => [...prev, fallbackMessage]);
+      generateSmartSuggestions('response', message);
     }
 
     setIsTyping(false);
@@ -354,6 +415,11 @@ What's your mountain activity or concern today?`
     handleSendMessage(scenario.prompt);
   };
 
+  const handleSuggestionClick = (suggestion) => {
+    setShowSuggestions(false);
+    handleSendMessage(suggestion);
+  };
+
   const formatTimestamp = (timestamp) => {
     return timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
@@ -440,6 +506,32 @@ What's your mountain activity or concern today?`
 
           <div ref={messagesEndRef} />
         </div>
+
+        {/* Smart Suggestions */}
+        {showSuggestions && suggestions.length > 0 && (
+          <div className="suggestions-container">
+            <div className="suggestions-header">
+              <span>💡 Suggested questions:</span>
+              <button
+                className="suggestions-close"
+                onClick={() => setShowSuggestions(false)}
+              >
+                ×
+              </button>
+            </div>
+            <div className="suggestions-grid">
+              {suggestions.map((suggestion, index) => (
+                <button
+                  key={index}
+                  className="suggestion-btn"
+                  onClick={() => handleSuggestionClick(suggestion)}
+                >
+                  {suggestion}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div className="chat-input">
           <input
@@ -742,6 +834,75 @@ What's your mountain activity or concern today?`
           cursor: not-allowed;
         }
 
+        .suggestions-container {
+          background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+          border-top: 1px solid #bae6fd;
+          padding: 1.5rem;
+          animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+          from {
+            transform: translateY(-20px);
+            opacity: 0;
+          }
+          to {
+            transform: translateY(0);
+            opacity: 1;
+          }
+        }
+
+        .suggestions-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 1rem;
+          font-weight: 600;
+          color: #0c4a6e;
+        }
+
+        .suggestions-close {
+          background: none;
+          border: none;
+          font-size: 1.5rem;
+          color: #64748b;
+          cursor: pointer;
+          padding: 0.25rem 0.5rem;
+          border-radius: 4px;
+          transition: background 0.2s;
+        }
+
+        .suggestions-close:hover {
+          background: rgba(100, 116, 139, 0.1);
+        }
+
+        .suggestions-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+          gap: 0.75rem;
+        }
+
+        .suggestion-btn {
+          background: white;
+          border: 2px solid #bae6fd;
+          color: #0c4a6e;
+          padding: 0.75rem 1rem;
+          border-radius: 8px;
+          cursor: pointer;
+          font-size: 0.875rem;
+          text-align: left;
+          transition: all 0.2s;
+          font-weight: 500;
+        }
+
+        .suggestion-btn:hover {
+          border-color: #0ea5e9;
+          background: #0ea5e9;
+          color: white;
+          transform: translateY(-1px);
+          box-shadow: 0 4px 12px rgba(14, 165, 233, 0.2);
+        }
+
         @media (max-width: 768px) {
           .scenarios-grid {
             grid-template-columns: 1fr;
@@ -765,6 +926,19 @@ What's your mountain activity or concern today?`
           }
 
           .chat-input {
+            padding: 1rem;
+          }
+
+          .suggestions-container {
+            padding: 1rem;
+          }
+
+          .suggestions-grid {
+            grid-template-columns: 1fr;
+          }
+
+          .suggestion-btn {
+            text-align: center;
             padding: 1rem;
           }
         }

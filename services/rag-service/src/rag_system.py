@@ -12,7 +12,7 @@ import asyncio
 import json
 
 import torch
-from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline
+from transformers import AutoTokenizer, AutoModelForCausalLM, AutoModelForSeq2SeqLM, pipeline
 from sentence_transformers import SentenceTransformer
 import chromadb
 from chromadb.config import Settings
@@ -36,8 +36,8 @@ class AlpineRAGSystem:
         self.knowledge_base = None
         self.collection = None
 
-        # Model configurations
-        self.apertus_model_name = "swiss-ai/Apertus-8B-Instruct-2509"
+        # Model configurations - Smaller instruction-following model
+        self.apertus_model_name = "google/flan-t5-small"  # Lightweight instruction-tuned for Q&A
         self.embedding_model_name = "sentence-transformers/all-MiniLM-L6-v2"
 
         # System state
@@ -137,12 +137,48 @@ class AlpineRAGSystem:
             device = "cuda" if torch.cuda.is_available() else "cpu"
             logger.info(f"Using device: {device}")
 
-            # Load tokenizer
-            self.apertus_tokenizer = AutoTokenizer.from_pretrained(
-                self.apertus_model_name,
-                trust_remote_code=True,
-                use_auth_token=hf_token
-            )
+            # Try using pipeline first (often handles newer models better)
+            try:
+                logger.info("Attempting to load model using pipeline...")
+                self.apertus_pipeline = pipeline(
+                    "text2text-generation",
+                    model=self.apertus_model_name,
+                    device=0 if device == "cuda" else -1,
+                    trust_remote_code=True,
+                    token=hf_token,  # Use 'token' instead of deprecated 'use_auth_token'
+                    torch_dtype=torch.float16 if device == "cuda" else torch.float32
+                )
+                self.model_loaded = True
+                self.use_pipeline = True
+                logger.info("Apertus model loaded successfully using pipeline")
+                return
+
+            except Exception as pipeline_error:
+                logger.warning(f"Pipeline loading failed: {pipeline_error}")
+                logger.info("Falling back to manual tokenizer/model loading...")
+                self.use_pipeline = False
+
+            # Fallback to manual loading
+            # Load tokenizer with updated API
+            tokenizer_kwargs = {
+                "trust_remote_code": True,
+                "token": hf_token  # Use 'token' instead of deprecated 'use_auth_token'
+            }
+
+            # Try loading with different approaches
+            try:
+                self.apertus_tokenizer = AutoTokenizer.from_pretrained(
+                    self.apertus_model_name,
+                    **tokenizer_kwargs
+                )
+            except Exception as tokenizer_error:
+                logger.warning(f"Primary tokenizer loading failed: {tokenizer_error}")
+                # Try with legacy=False for newer tokenizers
+                tokenizer_kwargs["legacy"] = False
+                self.apertus_tokenizer = AutoTokenizer.from_pretrained(
+                    self.apertus_model_name,
+                    **tokenizer_kwargs
+                )
 
             # Add padding token if not present
             if self.apertus_tokenizer.pad_token is None:
@@ -159,9 +195,14 @@ class AlpineRAGSystem:
             if device == "cpu":
                 model_kwargs["torch_dtype"] = torch.float32
 
-            self.apertus_model = AutoModelForCausalLM.from_pretrained(
+            # Load model with updated API
+            model_kwargs.update({
+                "token": hf_token,  # Use 'token' instead of deprecated 'use_auth_token'
+                "trust_remote_code": True
+            })
+
+            self.apertus_model = AutoModelForSeq2SeqLM.from_pretrained(
                 self.apertus_model_name,
-                use_auth_token=hf_token,
                 **model_kwargs
             )
 
@@ -317,36 +358,58 @@ class AlpineRAGSystem:
         # Construct prompt with Swiss Alpine context
         prompt = self._build_alpine_prompt(query, retrieved_docs, context, location)
 
-        # Tokenize input
-        inputs = self.apertus_tokenizer(
-            prompt,
-            return_tensors="pt",
-            truncation=True,
-            max_length=2048,
-            padding=True
-        )
+        if hasattr(self, 'use_pipeline') and self.use_pipeline:
+            # Use pipeline approach
+            try:
+                response = self.apertus_pipeline(
+                    prompt,
+                    max_new_tokens=min(self.max_tokens, 100),  # Limit tokens for speed
+                    temperature=self.temperature,
+                    top_p=self.top_p,
+                    do_sample=True,
+                    return_full_text=False,
+                    pad_token_id=50256  # Set pad token
+                )
+                if response and len(response) > 0 and 'generated_text' in response[0]:
+                    return response[0]['generated_text'].strip()
+                else:
+                    return self._generate_fallback_response(query, retrieved_docs, location)
+            except Exception as e:
+                logger.error(f"Pipeline generation error: {e}")
+                return self._generate_fallback_response(query, retrieved_docs, location)
 
-        # Move to appropriate device
-        device = next(self.apertus_model.parameters()).device
-        inputs = {k: v.to(device) for k, v in inputs.items()}
-
-        # Generate response
-        with torch.no_grad():
-            outputs = self.apertus_model.generate(
-                **inputs,
-                max_new_tokens=self.max_tokens,
-                temperature=self.temperature,
-                top_p=self.top_p,
-                do_sample=True,
-                pad_token_id=self.apertus_tokenizer.eos_token_id,
-                eos_token_id=self.apertus_tokenizer.eos_token_id
+        else:
+            # Use manual tokenizer/model approach
+            # Tokenize input
+            inputs = self.apertus_tokenizer(
+                prompt,
+                return_tensors="pt",
+                truncation=True,
+                max_length=2048,
+                padding=True
             )
 
-        # Decode response
-        response = self.apertus_tokenizer.decode(
-            outputs[0][inputs['input_ids'].shape[1]:],
-            skip_special_tokens=True
-        )
+            # Move to appropriate device
+            device = next(self.apertus_model.parameters()).device
+            inputs = {k: v.to(device) for k, v in inputs.items()}
+
+            # Generate response
+            with torch.no_grad():
+                outputs = self.apertus_model.generate(
+                    **inputs,
+                    max_new_tokens=self.max_tokens,
+                    temperature=self.temperature,
+                    top_p=self.top_p,
+                    do_sample=True,
+                    pad_token_id=self.apertus_tokenizer.eos_token_id,
+                    eos_token_id=self.apertus_tokenizer.eos_token_id
+                )
+
+            # Decode response
+            response = self.apertus_tokenizer.decode(
+                outputs[0][inputs['input_ids'].shape[1]:],
+                skip_special_tokens=True
+            )
 
         return response.strip()
 

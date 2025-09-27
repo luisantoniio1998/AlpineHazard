@@ -4,7 +4,9 @@ import WeatherDashboard from './components/WeatherDashboard';
 import RouteTracker from './components/RouteTracker';
 import AIAssistant from './components/AIAssistant';
 import EmergencyAlerts from './components/EmergencyAlerts';
-import { Mountain, CloudRain, MapPin, Shield, Menu } from 'lucide-react';
+import EmergencyPanel from './components/EmergencyPanel';
+import RiskAssessment from './components/RiskAssessment';
+import { Mountain, CloudRain, MapPin, Shield, Menu, Target } from 'lucide-react';
 import './App.css';
 
 function App() {
@@ -39,7 +41,16 @@ function App() {
             <div className="header-content">
               <div className="logo">
                 <Mountain className="logo-icon" />
-                <h1>Alpine Trail Guardian</h1>
+                <div className="logo-text">
+                  <h1>Alpine Trail Guardian</h1>
+                  <span className="powered-by">Powered by Swiss Re AI</span>
+                </div>
+              </div>
+
+              {/* Swiss Re Partnership */}
+              <div className="partnership-badge">
+                <img src="/src/img/swiss-re-logo.svg" alt="Swiss Re" className="partner-logo" />
+                <span className="partnership-text">Official Hackathon Partner</span>
               </div>
 
               {/* Connection Status */}
@@ -63,6 +74,10 @@ function App() {
                 <CloudRain size={20} />
                 Weather
               </Link>
+              <Link to="/risk" className="nav-link">
+                <Target size={20} />
+                Risk Assessment
+              </Link>
               <Link to="/route" className="nav-link">
                 <MapPin size={20} />
                 Route Tracker
@@ -83,11 +98,15 @@ function App() {
           <div className="container">
             <Routes>
               <Route path="/" element={<WeatherDashboard />} />
+              <Route path="/risk" element={<RiskAssessment />} />
               <Route path="/route" element={<RouteTracker />} />
               <Route path="/ai" element={<AIAssistant />} />
             </Routes>
           </div>
         </main>
+
+        {/* Emergency Panel - Floating Button */}
+        <EmergencyPanel />
 
         {/* Footer */}
         <footer className="app-footer">
@@ -97,9 +116,16 @@ function App() {
                 <h3>Alpine Trail Guardian</h3>
                 <p>AI-powered safety for Swiss Alpine adventures</p>
               </div>
-              <div className="footer-section">
-                <h4>Swiss Re Hackathon 2025</h4>
-                <p>Building resilience against extreme weather events</p>
+              <div className="footer-section swiss-re-section">
+                <div className="swiss-re-branding">
+                  <img src="/src/img/swiss-re-logo.svg" alt="Swiss Re" className="footer-logo" />
+                  <div className="branding-text">
+                    <h4>Swiss Re AI Week Hackathon 2024</h4>
+                    <p><strong>AI for Resilience against Extreme Weather Events</strong></p>
+                    <p>Challenge Focus: Avalanche × People & Health</p>
+                    <p className="swiss-re-motto">"We make the world more resilient"</p>
+                  </div>
+                </div>
               </div>
               <div className="footer-section">
                 <h4>Emergency</h4>
