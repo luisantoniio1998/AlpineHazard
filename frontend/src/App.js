@@ -49,7 +49,7 @@ function App() {
 
               {/* Swiss Re Partnership */}
               <div className="partnership-badge">
-                <img src="/src/img/swiss-re-logo.svg" alt="Swiss Re" className="partner-logo" />
+                <img src="/SR_Logo_CMYK_Lake.jpg" alt="Swiss Re" className="partner-logo" />
                 <span className="partnership-text">Official Hackathon Partner</span>
               </div>
 
@@ -118,7 +118,7 @@ function App() {
               </div>
               <div className="footer-section swiss-re-section">
                 <div className="swiss-re-branding">
-                  <img src="/src/img/swiss-re-logo.svg" alt="Swiss Re" className="footer-logo" />
+                  <img src="/SR_Logo_CMYK_Lake.jpg" alt="Swiss Re" className="footer-logo" />
                   <div className="branding-text">
                     <h4>Swiss Re AI Week Hackathon 2024</h4>
                     <p><strong>AI for Resilience against Extreme Weather Events</strong></p>

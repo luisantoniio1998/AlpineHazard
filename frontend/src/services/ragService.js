@@ -6,7 +6,7 @@
 class RAGService {
   constructor() {
     this.baseURL = process.env.REACT_APP_RAG_URL || 'http://localhost:8001';
-    this.timeout = 30000; // 30 seconds for AI responses
+    this.timeout = 60000; // 60 seconds for AI responses (FLAN-T5 is slow)
   }
 
   /**

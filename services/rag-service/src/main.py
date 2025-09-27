@@ -97,7 +97,8 @@ async def chat_with_alpine_ai(request: ChatRequest):
             query=request.message,
             context=request.context,
             location=request.location,
-            activity_type=request.activity_type
+            activity_type=request.activity_type,
+            language=request.language
         )
 
         return ChatResponse(

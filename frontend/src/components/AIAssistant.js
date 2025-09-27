@@ -112,20 +112,20 @@ Ask me anything about Swiss alpine safety, or try one of the scenarios below!`,
     let newSuggestions = [];
 
     const baseQuestions = [
-      "What's the current avalanche risk?",
-      "Show me emergency contacts",
-      "What equipment do I need today?",
-      "Is it safe to go off-piste?",
-      "What are the weather warnings?",
-      "How do I call for rescue?"
+      "Is the Matterhorn dangerous?",
+      "What are emergency numbers in Switzerland?",
+      "Tell me about Matterhorn safety",
+      "How dangerous is mountaineering?",
+      "What are Swiss rescue numbers?",
+      "Is it safe to climb the Matterhorn?"
     ];
 
     if (context === 'welcome') {
       newSuggestions = [
-        "What's the weather like in Zermatt today?",
         "Is it safe to hike the Matterhorn route?",
-        "Show me emergency numbers",
-        "What gear do I need for winter hiking?"
+        "Tell me about Matterhorn climbing dangers",
+        "What are emergency numbers in Switzerland?",
+        "How dangerous is the Matterhorn?"
       ];
     } else if (lastMessage.toLowerCase().includes('weather')) {
       newSuggestions = [
@@ -231,28 +231,29 @@ Ask me anything about Swiss alpine safety, or try one of the scenarios below!`,
 
     // Route planning responses
     if (message.includes('hike') || message.includes('route') || message.includes('zermatt') || message.includes('matterhorn')) {
-      response = `🎯 **Route Analysis: Zermatt to Matterhorn Base Camp**
+      response = `🚨 **IMPORTANT SAFETY WARNING**
 
-**Current Conditions:**
-• ✅ **Weather**: Partly cloudy, -2°C at base, -8°C at elevation
-• ⚠️ **Avalanche Risk**: Moderate (Level 3/5) above 2500m
-• ✅ **Trail Status**: Open with caution advisories
+I'm temporarily unable to access live safety data. Please check official sources immediately:
 
-**Safety Recommendations:**
-1. **Start Early** - Begin before 7 AM to avoid afternoon weather changes
-2. **Essential Gear** - Avalanche beacon, probe, shovel above Schwarzsee
-3. **Checkpoints** - Report at Furi Station (3.2km) and Schwarzsee (7.8km)
-4. **Turnaround Time** - If not at Schwarzsee by 11 AM, consider turning back
+**For Matterhorn specifically:**
+⚠️ **EXTREME DANGER** - The Matterhorn is one of the world's most dangerous mountains
+• Requires expert mountaineering skills
+• 4,478m elevation with technical rock/ice climbing
+• High fatality rate - many deaths annually
+• Only for experienced alpinists with proper gear and guides
 
-**Weather Alerts:**
-• Wind increasing to 45 km/h after 2 PM
-• Temperature drop expected around 3 PM
+**Essential checks before ANY alpine activity:**
+• **Weather**: meteoswiss.admin.ch
+• **Avalanche**: slf.ch
+• **Route conditions**: Local mountain guides/tourist offices
+• **Emergency**: Always carry emergency beacon
 
 **Emergency Contacts:**
 📞 Swiss Alpine Rescue: **1414**
 📞 Zermatt Mountain Rescue: **+41 27 966 0101**
 
-Would you like specific shelter locations or alternative route options?`;
+❌ **NEVER attempt technical routes without proper training and equipment**
+Please consult certified mountain guides for all alpine activities.`;
     }
     // Weather concerns
     else if (message.includes('weather') || message.includes('ski') || message.includes('verbier') || message.includes('off-piste')) {

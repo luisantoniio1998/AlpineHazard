@@ -36,6 +36,7 @@ Our solution directly tackles the hackathon's core objective: *"Use data and tec
 - **Route Tracker** - GPS-enabled trail monitoring
 - **AI Assistant** - RAG-powered conversational interface
 - **Emergency Panel** - One-touch access to Swiss emergency services
+- **Swiss Re Branding** - Official hackathon partner integration with corporate identity
 
 #### **Backend RAG System (Python/FastAPI)**
 - **AI Model Integration** - Google FLAN-T5 for instruction-following

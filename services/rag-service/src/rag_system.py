@@ -257,7 +257,8 @@ class AlpineRAGSystem:
         query: str,
         context: Optional[Dict[str, Any]] = None,
         location: Optional[str] = None,
-        activity_type: Optional[str] = None
+        activity_type: Optional[str] = None,
+        language: Optional[str] = "en"
     ) -> RAGResponse:
         """Get AI response using RAG with Apertus model"""
         start_time = time.time()
@@ -271,7 +272,7 @@ class AlpineRAGSystem:
             # 2. Generate response with Apertus
             if self.model_loaded:
                 response_text = await self._generate_with_apertus(
-                    query, retrieved_docs, context, location
+                    query, retrieved_docs, context, location, language
                 )
             else:
                 # Fallback to context-aware mock response
@@ -314,12 +315,18 @@ class AlpineRAGSystem:
         # Create embedding for query
         query_embedding = self.embedding_model.encode([query]).tolist()[0]
 
-        # Prepare filters
-        where_filter = {}
+        # Prepare filters - ChromaDB requires $and for multiple conditions
+        where_filter = None
+        conditions = []
         if location:
-            where_filter["location"] = {"$eq": location}
+            conditions.append({"location": {"$eq": location}})
         if activity_type:
-            where_filter["category"] = {"$eq": activity_type}
+            conditions.append({"category": {"$eq": activity_type}})
+
+        if len(conditions) == 1:
+            where_filter = conditions[0]
+        elif len(conditions) > 1:
+            where_filter = {"$and": conditions}
 
         # Query ChromaDB
         results = self.collection.query(
@@ -351,12 +358,13 @@ class AlpineRAGSystem:
         query: str,
         retrieved_docs: List[KnowledgeSearchResult],
         context: Optional[Dict[str, Any]],
-        location: Optional[str]
+        location: Optional[str],
+        language: Optional[str] = "en"
     ) -> str:
         """Generate response using Apertus model"""
 
         # Construct prompt with Swiss Alpine context
-        prompt = self._build_alpine_prompt(query, retrieved_docs, context, location)
+        prompt = self._build_alpine_prompt(query, retrieved_docs, context, location, language)
 
         if hasattr(self, 'use_pipeline') and self.use_pipeline:
             # Use pipeline approach
@@ -366,12 +374,18 @@ class AlpineRAGSystem:
                     max_new_tokens=min(self.max_tokens, 100),  # Limit tokens for speed
                     temperature=self.temperature,
                     top_p=self.top_p,
-                    do_sample=True,
-                    return_full_text=False,
-                    pad_token_id=50256  # Set pad token
+                    do_sample=True
                 )
                 if response and len(response) > 0 and 'generated_text' in response[0]:
-                    return response[0]['generated_text'].strip()
+                    generated_text = response[0]['generated_text'].strip()
+
+                    # Quality check: if response seems nonsensical, use retrieved knowledge directly
+                    if (len(generated_text) < 20 or
+                        "not found" in generated_text.lower() or
+                        "highest" in generated_text.lower() and "emergency" in query.lower()):
+                        return self._generate_fallback_response(query, retrieved_docs, location)
+
+                    return generated_text
                 else:
                     return self._generate_fallback_response(query, retrieved_docs, location)
             except Exception as e:
@@ -418,7 +432,8 @@ class AlpineRAGSystem:
         query: str,
         retrieved_docs: List[KnowledgeSearchResult],
         context: Optional[Dict[str, Any]],
-        location: Optional[str]
+        location: Optional[str],
+        language: Optional[str] = "en"
     ) -> str:
         """Build prompt for Apertus with Swiss Alpine context"""
 
@@ -436,8 +451,22 @@ class AlpineRAGSystem:
         for doc in retrieved_docs[:3]:  # Use top 3 most relevant
             knowledge_str += f"- {doc.content}\n"
 
-        # Build complete prompt
-        prompt = f"""Du bist ein erfahrener Schweizer Bergführer und Sicherheitsexperte. Beantworte Fragen über Alpine Sicherheit mit präzisen, praktischen Ratschlägen.
+        # Build language-specific prompt
+        if language == "en":
+            prompt = f"""You are an experienced Swiss mountain guide and safety expert. Answer Alpine safety questions with precise, practical advice.
+
+Context:
+{context_str}
+
+Relevant Information:
+{knowledge_str}
+
+Question: {query}
+
+Answer (in English):"""
+        else:
+            # Default to German for other languages or if unspecified
+            prompt = f"""Du bist ein erfahrener Schweizer Bergführer und Sicherheitsexperte. Beantworte Fragen über Alpine Sicherheit mit präzisen, praktischen Ratschlägen.
 
 Kontext:
 {context_str}
@@ -447,7 +476,7 @@ Relevante Informationen:
 
 Frage: {query}
 
-Antwort (auf Deutsch oder der gewünschten Sprache):"""
+Antwort (auf Deutsch):"""
 
         return prompt
 
@@ -460,17 +489,17 @@ Antwort (auf Deutsch oder der gewünschten Sprache):"""
         """Generate fallback response when Apertus model not available"""
 
         if not retrieved_docs:
-            return "Entschuldigung, ich kann momentan keine spezifischen Informationen zu Ihrer Anfrage finden. Für Notfälle wählen Sie bitte 1414 (Schweizer Bergrettung)."
+            return "Sorry, I cannot find specific information for your request at the moment. For emergencies, please call 1414 (Swiss Mountain Rescue)."
 
         # Use retrieved knowledge to create contextual response
         best_match = retrieved_docs[0]
 
-        response = f"Basierend auf den verfügbaren Informationen:\n\n{best_match.content}\n\n"
+        response = f"Based on available information:\n\n{best_match.content}\n\n"
 
         if location:
-            response += f"Für {location} empfehle ich zusätzlich, die aktuellen Wetterbedingungen und Lawinenwarnungen zu prüfen.\n\n"
+            response += f"For {location}, I additionally recommend checking current weather conditions and avalanche warnings.\n\n"
 
-        response += "⚠️ Wichtiger Hinweis: Bei Notfällen kontaktieren Sie sofort die Schweizer Bergrettung unter 1414."
+        response += "⚠️ Important Note: In emergencies, immediately contact Swiss Mountain Rescue at 1414."
 
         return response
 
