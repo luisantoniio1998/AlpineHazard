@@ -1,19 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import {
-  MessageCircle,
-  Send,
-  Bot,
-  User,
-  AlertTriangle,
-  MapPin,
-  Mountain,
-  CloudRain,
-  Thermometer,
-  Eye,
-  Phone,
-  Navigation,
-  Clock
-} from 'lucide-react';
+import { Send, Bot, User, Mountain, CloudRain, AlertTriangle, Navigation } from 'lucide-react';
 import ragService from '../services/ragService';
 
 const AIAssistant = () => {
@@ -28,29 +14,25 @@ const AIAssistant = () => {
     {
       id: 'hike-planning',
       title: 'Plan My Hike',
-      description: 'Get AI recommendations for your hiking route',
-      icon: <Mountain size={20} />,
+      description: 'Get recommendations for your hiking route',
       prompt: 'I want to hike from Zermatt to Matterhorn Base Camp tomorrow. What should I know about current conditions and safety recommendations?'
     },
     {
       id: 'weather-concern',
-      title: 'Weather Concerns',
-      description: 'Ask about weather conditions and risks',
-      icon: <CloudRain size={20} />,
+      title: 'Weather Conditions',
+      description: 'Ask about weather and risks',
       prompt: 'The weather looks uncertain for my ski trip to Verbier. Should I be worried about conditions on the off-piste areas?'
     },
     {
       id: 'emergency-help',
-      title: 'Emergency Guidance',
+      title: 'Emergency Help',
       description: 'Get help during emergencies',
-      icon: <AlertTriangle size={20} />,
-      prompt: 'I\'m stuck in bad weather near Jungfraujoch and visibility is very poor. What should I do?'
+      prompt: 'I am stuck in bad weather near Jungfraujoch and visibility is very poor. What should I do?'
     },
     {
       id: 'equipment-advice',
       title: 'Equipment Advice',
       description: 'Get gear recommendations',
-      icon: <Navigation size={20} />,
       prompt: 'What equipment do I need for a winter hike in the Swiss Alps with current conditions?'
     }
   ];
@@ -60,16 +42,16 @@ const AIAssistant = () => {
     const welcomeMessage = {
       id: Date.now(),
       type: 'bot',
-      content: `🏔️ **Welcome to Alpine Trail Guardian AI**
+      content: `Welcome to Alpine Trail Guardian AI
 
-I'm your intelligent mountain safety assistant! I can help you with:
+I can help you with:
 
-• **Route Planning** - Safe paths based on current conditions
-• **Weather Analysis** - Real-time risk assessment
-• **Emergency Guidance** - Step-by-step safety protocols
-• **Equipment Advice** - Gear recommendations for conditions
+- Route planning based on current conditions
+- Weather analysis and risk assessment
+- Emergency guidance and safety protocols
+- Equipment advice for alpine conditions
 
-Ask me anything about Swiss alpine safety, or try one of the scenarios below!`,
+Ask me anything about Swiss alpine safety, or try one of the scenarios below.`,
       timestamp: new Date()
     };
 
@@ -439,7 +421,7 @@ What's your mountain activity or concern today?`
 
       <style jsx>{`
         .ai-assistant {
-          max-width: 1000px;
+          max-width: 800px;
           margin: 0 auto;
         }
 
@@ -447,104 +429,78 @@ What's your mountain activity or concern today?`
           margin-bottom: 2rem;
         }
 
+        .scenarios h3 {
+          font-size: 16px;
+          font-weight: 500;
+          margin-bottom: 1rem;
+        }
+
         .scenarios-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-          gap: 1rem;
-          margin-top: 1rem;
+          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+          gap: 0.5rem;
         }
 
         .scenario-btn {
-          display: flex;
-          align-items: center;
-          gap: 1rem;
-          padding: 1.5rem;
-          border: 2px solid #e5e7eb;
+          padding: 1rem;
+          border: 1px solid #eee;
           background: white;
-          border-radius: 12px;
+          border-radius: 4px;
           cursor: pointer;
-          transition: all 0.2s;
           text-align: left;
+          transition: border-color 0.2s;
         }
 
         .scenario-btn:hover {
-          border-color: var(--alpine-blue);
-          transform: translateY(-2px);
-          box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-        }
-
-        .scenario-icon {
-          flex-shrink: 0;
-          padding: 1rem;
-          background: linear-gradient(135deg, var(--alpine-blue), #1d4ed8);
-          color: white;
-          border-radius: 12px;
+          border-color: #ccc;
         }
 
         .scenario-content h4 {
-          margin: 0 0 0.5rem 0;
-          color: var(--alpine-rock);
+          margin: 0 0 0.25rem 0;
+          font-size: 14px;
+          font-weight: 500;
         }
 
         .scenario-content p {
           margin: 0;
-          color: #6b7280;
-          font-size: 0.875rem;
+          color: #666;
+          font-size: 12px;
         }
 
         .chat-container {
-          height: 600px;
+          height: 500px;
           display: flex;
           flex-direction: column;
-          padding: 0;
           overflow: hidden;
         }
 
         .chat-header {
           display: flex;
           align-items: center;
-          gap: 1rem;
-          padding: 1.5rem;
-          background: linear-gradient(135deg, #3b82f6, #1e40af);
-          color: white;
-          border-radius: 12px 12px 0 0;
+          gap: 0.5rem;
+          padding: 1rem;
+          border-bottom: 1px solid #eee;
+          background: white;
         }
 
         .chat-header h3 {
           margin: 0;
           flex: 1;
-        }
-
-        .status-indicator {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-          font-size: 0.875rem;
-        }
-
-        .status-indicator.online {
-          color: #10b981;
-        }
-
-        .status-dot {
-          width: 8px;
-          height: 8px;
-          background: #10b981;
-          border-radius: 50%;
-          animation: pulse 2s infinite;
+          font-size: 14px;
+          font-weight: 500;
         }
 
         .messages-container {
           flex: 1;
           overflow-y: auto;
-          padding: 1.5rem;
-          background: #f8fafc;
+          padding: 1rem;
+          background: white;
         }
 
         .message {
           display: flex;
-          gap: 1rem;
-          margin-bottom: 1.5rem;
+          gap: 0.75rem;
+          margin-bottom: 1rem;
         }
 
         .message.user {
@@ -553,26 +509,19 @@ What's your mountain activity or concern today?`
 
         .message-avatar {
           flex-shrink: 0;
-          width: 40px;
-          height: 40px;
+          width: 28px;
+          height: 28px;
           border-radius: 50%;
           display: flex;
           align-items: center;
           justify-content: center;
-          color: white;
-        }
-
-        .message.bot .message-avatar {
-          background: linear-gradient(135deg, #3b82f6, #1e40af);
-        }
-
-        .message.user .message-avatar {
-          background: linear-gradient(135deg, #10b981, #059669);
+          background: #f5f5f5;
+          color: #666;
         }
 
         .message-content {
           flex: 1;
-          max-width: 70%;
+          max-width: 75%;
         }
 
         .message.user .message-content {
@@ -580,46 +529,16 @@ What's your mountain activity or concern today?`
         }
 
         .message-text {
-          background: white;
-          padding: 1rem 1.5rem;
-          border-radius: 18px;
-          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-          line-height: 1.5;
+          background: #f9f9f9;
+          padding: 0.75rem 1rem;
+          border-radius: 8px;
+          line-height: 1.4;
+          font-size: 14px;
         }
 
         .message.user .message-text {
-          background: linear-gradient(135deg, #3b82f6, #1e40af);
+          background: #333;
           color: white;
-          border-radius: 18px 18px 4px 18px;
-        }
-
-        .message.bot .message-text {
-          border-radius: 4px 18px 18px 18px;
-        }
-
-        .message-header {
-          margin: 0 0 1rem 0;
-          color: var(--alpine-blue);
-          font-size: 1.1rem;
-        }
-
-        .message.user .message-header {
-          color: #e0f2fe;
-        }
-
-        .message-bold {
-          font-weight: 600;
-          color: var(--alpine-rock);
-        }
-
-        .message.user .message-bold {
-          color: white;
-        }
-
-        .message-list-item,
-        .message-numbered-item {
-          margin: 0.5rem 0;
-          list-style: none;
         }
 
         .message-text p {
@@ -635,32 +554,28 @@ What's your mountain activity or concern today?`
         }
 
         .message-timestamp {
-          margin-top: 0.5rem;
-          font-size: 0.75rem;
-          color: #9ca3af;
+          margin-top: 0.25rem;
+          font-size: 11px;
+          color: #999;
         }
 
         .message.user .message-timestamp {
           text-align: right;
         }
 
-        .typing {
-          opacity: 0.7;
-        }
-
         .typing-indicator {
           display: flex;
           gap: 4px;
-          padding: 1rem 1.5rem;
-          background: white;
-          border-radius: 4px 18px 18px 18px;
+          padding: 0.75rem 1rem;
+          background: #f9f9f9;
+          border-radius: 8px;
         }
 
         .typing-indicator span {
-          width: 8px;
-          height: 8px;
+          width: 6px;
+          height: 6px;
           border-radius: 50%;
-          background: #9ca3af;
+          background: #ccc;
           animation: typing 1.4s infinite ease-in-out;
         }
 
@@ -674,44 +589,40 @@ What's your mountain activity or concern today?`
 
         .chat-input {
           display: flex;
-          gap: 1rem;
-          padding: 1.5rem;
+          gap: 0.5rem;
+          padding: 1rem;
           background: white;
-          border-radius: 0 0 12px 12px;
-          border-top: 1px solid #e5e7eb;
+          border-top: 1px solid #eee;
         }
 
         .message-input {
           flex: 1;
-          padding: 1rem 1.5rem;
-          border: 2px solid #e5e7eb;
-          border-radius: 25px;
+          padding: 0.75rem 1rem;
+          border: 1px solid #ddd;
+          border-radius: 4px;
           outline: none;
-          font-size: 1rem;
-          transition: border-color 0.2s;
+          font-size: 14px;
         }
 
         .message-input:focus {
-          border-color: var(--alpine-blue);
+          border-color: #999;
         }
 
         .send-button {
-          width: 50px;
-          height: 50px;
-          border: none;
-          background: linear-gradient(135deg, var(--alpine-blue), #1d4ed8);
-          color: white;
-          border-radius: 50%;
+          width: 36px;
+          height: 36px;
+          border: 1px solid #ddd;
+          background: white;
+          border-radius: 4px;
           cursor: pointer;
           display: flex;
           align-items: center;
           justify-content: center;
-          transition: all 0.2s;
+          color: #666;
         }
 
         .send-button:hover:not(:disabled) {
-          transform: scale(1.05);
-          box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+          background: #f5f5f5;
         }
 
         .send-button:disabled {
@@ -724,25 +635,8 @@ What's your mountain activity or concern today?`
             grid-template-columns: 1fr;
           }
 
-          .scenario-btn {
-            flex-direction: column;
-            text-align: center;
-          }
-
-          .chat-container {
-            height: 70vh;
-          }
-
           .message-content {
             max-width: 85%;
-          }
-
-          .messages-container {
-            padding: 1rem;
-          }
-
-          .chat-input {
-            padding: 1rem;
           }
         }
       `}</style>

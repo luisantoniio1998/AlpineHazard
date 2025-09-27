@@ -43,9 +43,10 @@
           integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
           crossorigin=""/>
 
-    <title>Alpine Trail Guardian - Swiss Mountain Safety AI</title>
+    <title>Trail Guardian - Swiss Re Safety AI</title>
 
     <style>
+      /* Loading screen styles */
       /* Loading screen styles */
       #loading-screen {
         position: fixed;
@@ -53,16 +54,14 @@
         left: 0;
         width: 100%;
         height: 100%;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: #ffffff;
         display: flex;
         flex-direction: column;
         justify-content: center;
         align-items: center;
-        z-index: 9999;
-        transition: opacity 0.5s ease-out;
-      }
-
-      #loading-screen.hidden {
+        gap: 2rem;
+        transition: opacity 0.3s ease-out;
+      }      #loading-screen.hidden {
         opacity: 0;
         pointer-events: none;
       }
@@ -149,13 +148,7 @@
 
     <!-- Loading Screen -->
     <div id="loading-screen">
-      <svg class="loading-logo" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M12 2L13.09 8.26L22 9L13.09 9.74L12 16L10.91 9.74L2 9L10.91 8.26L12 2Z" fill="white"/>
-        <path d="M12 16L13.09 22.26L22 23L13.09 23.74L12 30L10.91 23.74L2 23L10.91 22.26L12 16Z" fill="rgba(255,255,255,0.6)"/>
-      </svg>
-
-      <div class="loading-text">Alpine Trail Guardian</div>
-      <div class="loading-subtitle">Initializing safety systems...</div>
+      <img src="/SR_Logo_CMYK_Lake.jpg" alt="Swiss Re" class="loading-logo" />
       <div class="loading-spinner"></div>
     </div>
 

@@ -234,17 +234,17 @@ class RAGService {
    */
   getFallbackResponse(message, error) {
     const fallbackResponses = {
-      weather: "🌤️ I'm currently unable to access real-time weather data. Please check MeteoSwiss (meteoswiss.admin.ch) for current conditions and warnings. For emergencies, call 1414 (Swiss Alpine Rescue).",
+      weather: "I'm currently unable to access real-time weather data. Please check MeteoSwiss (meteoswiss.admin.ch) for current conditions and warnings. For emergencies, call 1414 (Swiss Alpine Rescue).",
 
-      route: "🥾 I can't access live route conditions right now. Please check with local mountain guides or visitor centers for current trail conditions. Always inform someone of your planned route.",
+      route: "I can't access live route conditions right now. Please check with local mountain guides or visitor centers for current trail conditions. Always inform someone of your planned route.",
 
-      emergency: "🚨 **SWISS EMERGENCY NUMBERS**:\n\n• **1414** - Swiss Alpine Rescue (REGA) - PRIMARY for mountain emergencies\n• **112** - European Emergency Number\n• **117** - Police\n• **118** - Fire Department\n• **144** - Medical Emergency/Ambulance\n\n**For mountain accidents**: Call 1414 first!\n\nProvide: exact location, number of people, weather conditions, helicopter landing possible?",
+      emergency: "SWISS EMERGENCY NUMBERS:\n\n- 1414 - Swiss Alpine Rescue (REGA) - PRIMARY for mountain emergencies\n- 112 - European Emergency Number\n- 117 - Police\n- 118 - Fire Department\n- 144 - Medical Emergency/Ambulance\n\nFor mountain accidents: Call 1414 first!\n\nProvide: exact location, number of people, weather conditions, helicopter landing possible?",
 
-      avalanche: "⚠️ For current avalanche conditions, please check the official SLF bulletin at slf.ch. Never venture off-piste without proper equipment and knowledge. When in doubt, stay on marked trails.",
+      avalanche: "For current avalanche conditions, please check the official SLF bulletin at slf.ch. Never venture off-piste without proper equipment and knowledge. When in doubt, stay on marked trails.",
 
-      equipment: "🎒 I can't access equipment recommendations right now. For proper alpine gear, consult local mountain shops or the Swiss Alpine Club (SAC) guidelines. Always carry safety equipment appropriate for conditions.",
+      equipment: "I can't access equipment recommendations right now. For proper alpine gear, consult local mountain shops or the Swiss Alpine Club (SAC) guidelines. Always carry safety equipment appropriate for conditions.",
 
-      default: "🏔️ I'm temporarily unable to provide detailed guidance. For immediate safety information:\n\n• Weather: meteoswiss.admin.ch\n• Avalanche: slf.ch\n• Emergency: 1414\n• Route conditions: local tourist offices\n\nI'll be back with full AI assistance soon!"
+      default: "I'm temporarily unable to provide detailed guidance. For immediate safety information:\n\n- Weather: meteoswiss.admin.ch\n- Avalanche: slf.ch\n- Emergency: 1414\n- Route conditions: local tourist offices\n\nI'll be back with full AI assistance soon."
     };
 
     // Determine response type based on message content
