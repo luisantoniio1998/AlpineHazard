@@ -23,24 +23,35 @@ class RAGService {
         session_id: this.getSessionId()
       };
 
+      console.log('RAG Service: Sending request to', this.baseURL);
+      console.log('RAG Service: Request body:', requestBody);
+
+      // Create manual abort controller for better compatibility
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), this.timeout);
+
       const response = await fetch(`${this.baseURL}/chat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(requestBody),
-        signal: AbortSignal.timeout(this.timeout)
+        signal: controller.signal
       });
+
+      clearTimeout(timeoutId);
 
       if (!response.ok) {
         throw new Error(`RAG API error: ${response.status} ${response.statusText}`);
       }
 
       const data = await response.json();
+      console.log('RAG Service: Response received:', data);
       return this.formatResponse(data);
 
     } catch (error) {
       console.error('RAG Service error:', error);
+      console.error('RAG Service: Error details:', error.message);
       return this.getFallbackResponse(message, error);
     }
   }
@@ -227,7 +238,7 @@ class RAGService {
 
       route: "🥾 I can't access live route conditions right now. Please check with local mountain guides or visitor centers for current trail conditions. Always inform someone of your planned route.",
 
-      emergency: "🚨 **EMERGENCY RESPONSE**: If this is an emergency, call immediately:\n• 1414 - Swiss Alpine Rescue (REGA)\n• 112 - European Emergency\n• 117 - Police\n\nFor non-emergencies, I'm temporarily unavailable but will be back soon.",
+      emergency: "🚨 **SWISS EMERGENCY NUMBERS**:\n\n• **1414** - Swiss Alpine Rescue (REGA) - PRIMARY for mountain emergencies\n• **112** - European Emergency Number\n• **117** - Police\n• **118** - Fire Department\n• **144** - Medical Emergency/Ambulance\n\n**For mountain accidents**: Call 1414 first!\n\nProvide: exact location, number of people, weather conditions, helicopter landing possible?",
 
       avalanche: "⚠️ For current avalanche conditions, please check the official SLF bulletin at slf.ch. Never venture off-piste without proper equipment and knowledge. When in doubt, stay on marked trails.",
 
@@ -240,7 +251,9 @@ class RAGService {
     const messageLC = message.toLowerCase();
     let responseType = 'default';
 
-    if (messageLC.includes('emergency') || messageLC.includes('help') || messageLC.includes('stuck')) {
+    if (messageLC.includes('emergency') || messageLC.includes('help') || messageLC.includes('stuck') ||
+        messageLC.includes('numbers') || messageLC.includes('contact') || messageLC.includes('rescue') ||
+        messageLC.includes('call') || messageLC.includes('1414') || messageLC.includes('112')) {
       responseType = 'emergency';
     } else if (messageLC.includes('weather') || messageLC.includes('forecast')) {
       responseType = 'weather';
