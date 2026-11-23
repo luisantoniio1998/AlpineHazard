@@ -1,89 +1,23 @@
-# Swiss Heat Shield AI
+# Swiss Heat Shield
 
-**AI for Resilience against Extreme Weather Events - Swiss Re Hackathon**
+The heatwave prototype from our Swiss Re hackathon work. It pairs a React interface with a FastAPI backend to explore location-based alerts, user profiles, and parametric-trigger logic.
 
-## 🎯 Problem Statement
+## What the code does
 
-Switzerland faces increasing heatwave risks with direct health impacts on vulnerable populations. The 2023 record temperatures demonstrated the urgent need for proactive AI-powered early warning systems.
+- Generates sample weather values for a set of Swiss cities.
+- Calculates a risk score using temperature thresholds.
+- Produces example recommendations from profile fields.
+- Stores users, alerts, and triggers in memory.
+- Checks example parametric triggers against the simulated temperature.
 
-## 🛡️ Solution: Swiss Heat Shield AI
+Despite the `MeteoSwissAPI` class name, the current implementation generates temperatures locally. The risk score is rule-based, and the fixed confidence value is not a measured prediction accuracy. The trigger endpoint simulates a payout amount; it does not issue payments.
 
-An intelligent early warning system that combines:
-- **Real-time heatwave prediction** using MeteoSwiss data
-- **Personalized risk assessment** based on location and vulnerability
-- **AI-powered health recommendations**
-- **Parametric insurance integration** for automatic cooling assistance
+## Files
 
-## 🎯 Target Hazard-Exposure Intersection
+- `backend/main.py` — API, sample weather, risk scoring, and trigger logic
+- `backend/requirements.txt` — Python dependencies
+- `frontend/` — React dashboard, alert, and user-profile views
 
-**Heatwave × People & Health**
+This is hackathon code. It has no live weather feed, persistent database, or operational insurance integration.
 
-### Why This Focus?
-- 🚨 **Urgent**: Record 2023 temperatures with direct health impacts
-- 📊 **Data Rich**: MeteoSwiss real-time + forecast data available
-- 🤖 **AI Innovation**: Predictive modeling with personalized recommendations
-- 💊 **Impact**: Direct protection of vulnerable populations
-- 💰 **Insurance**: Health costs spike during heatwaves
-
-## 👥 Target Users
-
-1. **Vulnerable Individuals**: Elderly, chronic conditions, outdoor workers
-2. **Municipalities**: Emergency response coordination
-3. **Health Insurers**: Proactive intervention to reduce claims
-
-## 🔄 Core Features
-
-### 1. Predictive Early Warning
-- Real-time temperature monitoring via MeteoSwiss API
-- 72-hour heatwave forecasting with AI models
-- Location-specific risk scoring
-
-### 2. Personalized Health Alerts
-- User vulnerability profiling (age, health, occupation)
-- Customized recommendations (hydration, cooling centers, activity timing)
-- Multi-channel notifications (SMS, app, email)
-
-### 3. Parametric Insurance
-- Automatic trigger when temperature > threshold for > duration
-- Instant payouts for cooling assistance (fans, AC, cooling centers)
-- Claims-free intervention reduces future health costs
-
-### 4. Resource Optimization
-- Cooling center capacity management
-- Emergency service allocation
-- Public health resource deployment
-
-## 📊 Data Sources
-
-- **MeteoSwiss**: Real-time temperature, humidity, forecasts
-- **Swiss Federal Statistical Office**: Demographics, health statistics
-- **OpenStreetMap**: Cooling centers, green spaces, hospitals
-- **Historical Data**: Past heatwave impacts for model training
-
-## 🏗️ Architecture
-
-```
-Frontend (React)     → Dashboard, alerts, user profiles
-Backend (FastAPI)    → MeteoSwiss integration, AI models, insurance logic
-AI Models (Python)  → Risk prediction, personalization, optimization
-Database (PostgreSQL) → User data, historical patterns, insurance records
-```
-
-## 🚀 MVP Scope (36 hours)
-
-1. **MeteoSwiss API Integration**: Real-time temperature data
-2. **Simple AI Model**: Heatwave risk prediction
-3. **Basic Frontend**: User registration, alerts dashboard
-4. **Parametric Logic**: Temperature trigger simulation
-5. **Demo Dataset**: Sample Swiss locations and users
-
-## 📈 Success Metrics
-
-- **Accuracy**: >85% heatwave prediction accuracy
-- **Timeliness**: Alerts 24-48 hours before dangerous conditions
-- **Reach**: Prototype covers 5+ Swiss cities
-- **Impact**: Clear demonstration of health benefit potential
-
----
-
-*Developed for Swiss Re "AI for Resilience against Extreme Weather Events" Hackathon, Zurich, September 2025*
+See the [main project README](../README.md) for the wider Alpine Trail Guardian prototype.
